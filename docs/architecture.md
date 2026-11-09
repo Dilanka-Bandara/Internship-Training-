@@ -1,0 +1,110 @@
+# Architecture — Service Request Management System
+
+> Status: Draft (Day 1). The Mermaid diagrams below render on GitHub. Also redraw them in draw.io or Excalidraw and save `docs/architecture.png` plus the editable source file.
+
+## 1. Overview
+
+The system is a **modular monolith**: one Next.js frontend, one Express API, and one PostgreSQL database. The API is organised by feature (`modules/requests`) and each feature is split into layers: **routes/controller → service → repository**.
+
+## 2. Context diagram (C4 level 1)
+
+```mermaid
+flowchart TB
+    emp["Employee<br/>(reports problems)"]
+    agent["Support agent<br/>(handles requests)"]
+    op["Operator<br/>(checks health)"]
+    sys["Service Request<br/>Management System"]
+    emp -->|creates and tracks requests| sys
+    agent -->|views, filters, updates status| sys
+    op -->|checks /api/health| sys
+```
+
+No external systems in the MVP (no email, no SSO).
+
+## 3. Container diagram (C4 level 2)
+
+```mermaid
+flowchart TB
+    users["Employee / Support agent<br/>(web browser)"]
+    fe["Next.js frontend<br/>TypeScript, React<br/>Screens, forms, API client"]
+    api["Express API<br/>Node.js, TypeScript<br/>routes → controller → service → repository"]
+    db[("PostgreSQL<br/>service_requests table")]
+    users -->|HTTPS| fe
+    fe -->|HTTPS / JSON| api
+    api -->|SQL via Prisma| db
+```
+
+The browser never talks to the database directly. Only the API holds the database connection string.
+
+## 4. Layer responsibilities
+
+| Layer | Owns | Never does |
+|---|---|---|
+| Frontend (Next.js) | Screens, form state, client-side validation for comfort, calling the API, showing loading/empty/error/success | Hold DB credentials; be the only place rules are checked |
+| Routes / controller | Read the HTTP request, validate input (Zod), choose status code, send JSON | Business decisions, SQL |
+| Service | Business rules (new requests start `OPEN`, allowed status transitions) | Touch `req`/`res`, write SQL |
+| Repository | Database queries only (Prisma) | Business rules, HTTP |
+| Database | Data, constraints (NOT NULL, lengths, enums), index on `status`, migrations | Be reachable from the browser |
+| Cross-cutting | Config (env vars), error handler, logging, validation helpers | Be copy-pasted per module |
+
+**Dependency direction:** controller → service → repository → database. Never backwards.
+
+**Where things belong:**
+- Validation: at the API edge (controller, Zod) **and** again in the database (constraints).
+- Business rules: service.
+- Persistence: repository.
+
+## 5. Request flow — "Create request"
+
+```mermaid
+sequenceDiagram
+    actor U as Employee
+    participant UI as Next.js UI
+    participant C as Controller
+    participant S as Service
+    participant R as Repository
+    participant DB as PostgreSQL
+    U->>UI: Fill form, click "Create"
+    UI->>UI: Client-side check (title, description length)
+    UI->>C: POST /api/requests (JSON)
+    C->>C: Validate body with Zod
+    alt invalid
+        C-->>UI: 400 VALIDATION_ERROR + field details
+        UI-->>U: Show messages next to fields
+    else valid
+        C->>S: createRequest(cleanData)
+        S->>S: Apply rule: status = OPEN
+        S->>R: create(data)
+        R->>DB: INSERT (parameterised)
+        DB-->>R: New row
+        R-->>S: Record
+        S-->>C: Record
+        C-->>UI: 201 Created + record
+        UI-->>U: "Request created"
+    end
+```
+
+Step by step:
+
+1. The user fills in the form and clicks **Create**.
+2. The frontend checks the fields quickly (for comfort only) and sends `POST /api/requests` with a JSON body through the single API client.
+3. The controller validates the body with the Zod schema. If invalid → `400` with the standard error shape.
+4. The controller passes clean data to the service.
+5. The service applies business rules — a new request always starts as `OPEN`.
+6. The repository saves the record with Prisma (parameterised query).
+7. The API returns `201 Created` with the new record.
+8. The frontend shows a success message only after the `201`. On network or server error it shows an error message instead.
+9. Unexpected errors go to the error handler: full details in the server log, generic `500` message to the client.
+
+## 6. Why this architecture fits
+
+- One trainee, 5 days, small internal app → one deployable backend is simplest to run, test and explain.
+- Layers give each type of code one clear home, so business rules can be unit tested without starting a server.
+- A separate Express API (instead of only Next.js API routes) can be tested with Supertest without the UI and matches the guide's stack.
+
+See [ADR-001](decisions/ADR-001-architecture.md) for the decision record, alternatives, trade-off and risk.
+
+## 7. Known risks
+
+- **No login in the MVP:** anyone who can reach the app on the network can create requests and change statuses. Accepted for training; listed as future work.
+- **Single database instance:** if PostgreSQL is down, the whole app is down. The health endpoint returns `503` so this is visible.
