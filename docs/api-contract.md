@@ -1,6 +1,6 @@
 # API Contract — Service Request Management System
 
-> Status: Draft (Day 1). Base URL (local): `http://localhost:4000`. All bodies are JSON (`Content-Type: application/json`).
+> Status: Implemented (Day 3) — verified against the running API; see `evidence/Day-05/api-test-output.txt`. Base URL (local): `http://localhost:4000`. All bodies are JSON (`Content-Type: application/json`).
 
 ## 1. Endpoints
 
@@ -10,7 +10,7 @@
 | GET | `/api/requests?status=OPEN` | List requests, optional status filter, newest first | `200` + array | `400` invalid status value |
 | GET | `/api/requests/{id}` | Get one request | `200` + record | `400` invalid id, `404` not found |
 | PATCH | `/api/requests/{id}/status` | Change status | `200` + updated record | `400` invalid id/body, `404` not found, `409` invalid transition |
-| GET | `/api/health` | Health check | `200 {"status":"ok"}` | `503` database unavailable |
+| GET | `/api/health` | Health check | `200 {"status":"ok","database":"up"}` | `503` database unavailable |
 
 Any unknown route → `404 ROUTE_NOT_FOUND`. Any unexpected server error → `500 INTERNAL_ERROR` (details only in server logs).
 
@@ -49,6 +49,7 @@ Any unknown route → `404 ROUTE_NOT_FOUND`. Any unexpected server error → `50
 |---|---|---|
 | `VALIDATION_ERROR` | 400 | Body, params or query fail validation |
 | `INVALID_JSON` | 400 | Body is not valid JSON |
+| `PAYLOAD_TOO_LARGE` | 413 | Body is larger than 100 kB |
 | `REQUEST_NOT_FOUND` | 404 | No request with that id |
 | `ROUTE_NOT_FOUND` | 404 | Unknown path |
 | `INVALID_STATUS_TRANSITION` | 409 | Status change not allowed by the workflow |
@@ -78,7 +79,8 @@ Request:
     "code": "VALIDATION_ERROR",
     "message": "Invalid input",
     "details": {
-      "title": ["Title must be at least 3 characters"],
+      "title": ["Title is required"],
+      "description": ["Description must be at least 10 characters"],
       "priority": ["Invalid option: expected one of \"LOW\"|\"MEDIUM\"|\"HIGH\""]
     }
   }
@@ -125,7 +127,7 @@ Request `{ "status": "OPEN" }` on a `CLOSED` request → `409 Conflict`:
 
 `200 OK`:
 ```json
-{ "status": "ok" }
+{ "status": "ok", "database": "up" }
 ```
 
 `503 Service Unavailable` (database down):
