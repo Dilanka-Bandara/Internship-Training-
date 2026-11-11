@@ -1,0 +1,128 @@
+
+### Health check
+$ curl http://localhost:4000/api/health
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: http://localhost:3000
+Content-Type: application/json; charset=utf-8
+
+{"status":"ok","database":"up"}
+
+
+### Create request (valid)
+$ curl -X POST http://localhost:4000/api/requests -H Content-Type: application/json -d {"title":"Printer not working","description":"The 2nd floor printer shows error E04.","category":"IT","priority":"HIGH"}
+HTTP/1.1 201 Created
+Access-Control-Allow-Origin: http://localhost:3000
+Content-Type: application/json; charset=utf-8
+
+{"id":"b24445df-c28b-49f7-81f6-35f76ad945eb","title":"Printer not working","description":"The 2nd floor printer shows error E04.","category":"IT","priority":"HIGH","status":"OPEN","createdAt":"2026-11-10T11:27:22.850Z","updatedAt":"2026-11-10T11:27:22.850Z"}
+
+
+### Create with extra field "status":"CLOSED" (ignored -> still OPEN), id=6bdc3db0-4497-46f8-9249-fcc0bceaf85e
+
+### List all
+$ curl http://localhost:4000/api/requests
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: http://localhost:3000
+Content-Type: application/json; charset=utf-8
+
+[{"id":"6bdc3db0-4497-46f8-9249-fcc0bceaf85e","title":"Air conditioner too cold","description":"Meeting room B air conditioner cannot be adjusted.","category":"FACILITIES","priority":"MEDIUM","status":"OPEN","createdAt":"2026-11-10T11:27:22.934Z","updatedAt":"2026-11-10T11:27:22.934Z"},{"id":"b24445df-c28b-49f7-81f6-35f76ad945eb","title":"Printer not working","description":"The 2nd floor printer shows error E04.","category":"IT","priority":"HIGH","status":"OPEN","createdAt":"2026-11-10T11:27:22.850Z","updatedAt":"2026-11-10T11:27:22.850Z"},{"id":"7335b711-246b-405b-9a68-a9ccbe9d82aa","title":"Air conditioner too cold","description":"Meeting room B air conditioner cannot be adjusted.","category":"FACILITIES","priority":"MEDIUM","status":"IN_PROGRESS","createdAt":"2026-11-10T11:26:45.219Z","updatedAt":"2026-11-10T11:26:45.899Z"},{"id":"3bdd1196-0e9c-4bdb-b495-924e7adcb394","title":"Printer not working","description":"The 2nd floor printer shows error E04.","category":"IT","priority":"HIGH","status":"OPEN","createdAt":"2026-11-10T11:26:45.121Z","updatedAt":"2026-11-10T11:26:45.121Z"}]
+
+
+### List filtered (status=OPEN)
+$ curl http://localhost:4000/api/requests?status=OPEN
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: http://localhost:3000
+Content-Type: application/json; charset=utf-8
+
+[{"id":"6bdc3db0-4497-46f8-9249-fcc0bceaf85e","title":"Air conditioner too cold","description":"Meeting room B air conditioner cannot be adjusted.","category":"FACILITIES","priority":"MEDIUM","status":"OPEN","createdAt":"2026-11-10T11:27:22.934Z","updatedAt":"2026-11-10T11:27:22.934Z"},{"id":"b24445df-c28b-49f7-81f6-35f76ad945eb","title":"Printer not working","description":"The 2nd floor printer shows error E04.","category":"IT","priority":"HIGH","status":"OPEN","createdAt":"2026-11-10T11:27:22.850Z","updatedAt":"2026-11-10T11:27:22.850Z"},{"id":"3bdd1196-0e9c-4bdb-b495-924e7adcb394","title":"Printer not working","description":"The 2nd floor printer shows error E04.","category":"IT","priority":"HIGH","status":"OPEN","createdAt":"2026-11-10T11:26:45.121Z","updatedAt":"2026-11-10T11:26:45.121Z"}]
+
+
+### List with invalid status -> 400
+$ curl http://localhost:4000/api/requests?status=DONE
+HTTP/1.1 400 Bad Request
+Access-Control-Allow-Origin: http://localhost:3000
+Content-Type: application/json; charset=utf-8
+
+{"error":{"code":"VALIDATION_ERROR","message":"Invalid input","details":{"status":["Invalid option: expected one of \"OPEN\"|\"IN_PROGRESS\"|\"RESOLVED\"|\"CLOSED\""]}}}
+
+
+### Get one
+$ curl http://localhost:4000/api/requests/6bdc3db0-4497-46f8-9249-fcc0bceaf85e
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: http://localhost:3000
+Content-Type: application/json; charset=utf-8
+
+{"id":"6bdc3db0-4497-46f8-9249-fcc0bceaf85e","title":"Air conditioner too cold","description":"Meeting room B air conditioner cannot be adjusted.","category":"FACILITIES","priority":"MEDIUM","status":"OPEN","createdAt":"2026-11-10T11:27:22.934Z","updatedAt":"2026-11-10T11:27:22.934Z"}
+
+
+### Get with invalid id -> 400
+$ curl http://localhost:4000/api/requests/abc
+HTTP/1.1 400 Bad Request
+Access-Control-Allow-Origin: http://localhost:3000
+Content-Type: application/json; charset=utf-8
+
+{"error":{"code":"VALIDATION_ERROR","message":"Invalid input","details":{"id":["Invalid request id"]}}}
+
+
+### Get unknown id -> 404
+$ curl http://localhost:4000/api/requests/00000000-0000-4000-8000-000000000000
+HTTP/1.1 404 Not Found
+Access-Control-Allow-Origin: http://localhost:3000
+Content-Type: application/json; charset=utf-8
+
+{"error":{"code":"REQUEST_NOT_FOUND","message":"Request not found"}}
+
+
+### Create invalid (empty title, missing fields) -> 400
+$ curl -X POST http://localhost:4000/api/requests -H Content-Type: application/json -d {"title":"  "}
+HTTP/1.1 400 Bad Request
+Access-Control-Allow-Origin: http://localhost:3000
+Content-Type: application/json; charset=utf-8
+
+{"error":{"code":"VALIDATION_ERROR","message":"Invalid input","details":{"title":["Title is required"],"description":["Description is required"],"category":["Invalid option: expected one of \"IT\"|\"FACILITIES\"|\"OTHER\""],"priority":["Invalid option: expected one of \"LOW\"|\"MEDIUM\"|\"HIGH\""]}}}
+
+
+### Create with broken JSON -> 400
+$ curl -X POST http://localhost:4000/api/requests -H Content-Type: application/json -d {"title": 
+HTTP/1.1 400 Bad Request
+Access-Control-Allow-Origin: http://localhost:3000
+Content-Type: application/json; charset=utf-8
+
+{"error":{"code":"INVALID_JSON","message":"Body is not valid JSON"}}
+
+
+### Status OPEN -> IN_PROGRESS (allowed)
+$ curl -X PATCH http://localhost:4000/api/requests/6bdc3db0-4497-46f8-9249-fcc0bceaf85e/status -H Content-Type: application/json -d {"status":"IN_PROGRESS"}
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: http://localhost:3000
+Content-Type: application/json; charset=utf-8
+
+{"id":"6bdc3db0-4497-46f8-9249-fcc0bceaf85e","title":"Air conditioner too cold","description":"Meeting room B air conditioner cannot be adjusted.","category":"FACILITIES","priority":"MEDIUM","status":"IN_PROGRESS","createdAt":"2026-11-10T11:27:22.934Z","updatedAt":"2026-11-10T11:27:23.530Z"}
+
+
+### Status IN_PROGRESS -> CLOSED (not allowed) -> 409
+$ curl -X PATCH http://localhost:4000/api/requests/6bdc3db0-4497-46f8-9249-fcc0bceaf85e/status -H Content-Type: application/json -d {"status":"CLOSED"}
+HTTP/1.1 409 Conflict
+Access-Control-Allow-Origin: http://localhost:3000
+Content-Type: application/json; charset=utf-8
+
+{"error":{"code":"INVALID_STATUS_TRANSITION","message":"Cannot change status from IN_PROGRESS to CLOSED"}}
+
+
+### Status with invalid value -> 400
+$ curl -X PATCH http://localhost:4000/api/requests/6bdc3db0-4497-46f8-9249-fcc0bceaf85e/status -H Content-Type: application/json -d {"status":"DONE"}
+HTTP/1.1 400 Bad Request
+Access-Control-Allow-Origin: http://localhost:3000
+Content-Type: application/json; charset=utf-8
+
+{"error":{"code":"VALIDATION_ERROR","message":"Invalid input","details":{"status":["Invalid option: expected one of \"OPEN\"|\"IN_PROGRESS\"|\"RESOLVED\"|\"CLOSED\""]}}}
+
+
+### Unknown route -> 404
+$ curl http://localhost:4000/api/nothing
+HTTP/1.1 404 Not Found
+Access-Control-Allow-Origin: http://localhost:3000
+Content-Type: application/json; charset=utf-8
+
+{"error":{"code":"ROUTE_NOT_FOUND","message":"Route not found"}}
+

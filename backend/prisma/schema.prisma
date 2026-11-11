@@ -1,0 +1,44 @@
+// Database schema. Matches docs/data-model.md.
+// Change it, then run `npm run db:migrate -- --name <change>` to create a migration.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Category {
+  IT
+  FACILITIES
+  OTHER
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum RequestStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+model ServiceRequest {
+  id          String        @id @default(uuid()) @db.Uuid
+  title       String        @db.VarChar(120)
+  description String        @db.VarChar(2000)
+  category    Category
+  priority    Priority
+  status      RequestStatus @default(OPEN)
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@map("service_requests")
+}
