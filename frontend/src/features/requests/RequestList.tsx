@@ -115,7 +115,12 @@ export function RequestList() {
               className="flex flex-col gap-1 p-4 sm:flex-row sm:items-center sm:justify-between"
             >
               <div className="min-w-0">
-                <p className="truncate font-medium">{r.title}</p>
+                <Link
+                  href={`/requests/${r.id}`}
+                  className="block truncate font-medium hover:underline"
+                >
+                  {r.title}
+                </Link>
                 <p className="text-xs text-zinc-500">
                   {CATEGORY_LABELS[r.category]} · {PRIORITY_LABELS[r.priority]}{" "}
                   priority · {new Date(r.createdAt).toLocaleString()}
