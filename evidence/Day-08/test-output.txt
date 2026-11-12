@@ -1,0 +1,63 @@
+$ cd backend && npm test   (2026-11-12 08:50)
+
+ RUN  v5.1.0 E:/VisionRoot Internship/Internship-Training-/backend
+
+ ✓ tests/integration/requests.api.test.ts > GET /api/health > returns 200 when the database is reachable 122ms
+ ✓ tests/integration/requests.api.test.ts > POST /api/requests > creates a request with status OPEN and server-set fields 39ms
+ ✓ tests/integration/requests.api.test.ts > POST /api/requests > ignores a status sent by the client (always OPEN) 14ms
+ ✓ tests/integration/requests.api.test.ts > POST /api/requests > returns 400 with field errors for missing fields 11ms
+ ✓ tests/integration/requests.api.test.ts > POST /api/requests > returns a single 'Title is required' message for a blank title 11ms
+ ✓ tests/integration/requests.api.test.ts > POST /api/requests > returns 400 for an unknown priority 11ms
+ ✓ tests/integration/requests.api.test.ts > POST /api/requests > returns 400 INVALID_JSON for a broken JSON body 10ms
+ ✓ tests/integration/requests.api.test.ts > POST /api/requests > does not save anything when validation fails 17ms
+ ✓ tests/integration/requests.api.test.ts > GET /api/requests > returns an empty array when there are no requests 15ms
+ ✓ tests/integration/requests.api.test.ts > GET /api/requests > lists requests newest first and filters by status 63ms
+ ✓ tests/integration/requests.api.test.ts > GET /api/requests > returns 400 for an invalid status filter 9ms
+ ✓ tests/integration/requests.api.test.ts > GET /api/requests/:id > returns the request 21ms
+ ✓ tests/integration/requests.api.test.ts > GET /api/requests/:id > returns 400 for an id that is not a UUID 9ms
+ ✓ tests/integration/requests.api.test.ts > GET /api/requests/:id > returns 404 for an id that does not exist 10ms
+ ✓ tests/integration/requests.api.test.ts > PATCH /api/requests/:id/status > allows OPEN -> IN_PROGRESS and saves it 24ms
+ ✓ tests/integration/requests.api.test.ts > PATCH /api/requests/:id/status > returns 409 and keeps the old status for OPEN -> RESOLVED 23ms
+ ✓ tests/integration/requests.api.test.ts > PATCH /api/requests/:id/status > returns 409 for any change from CLOSED 32ms
+ ✓ tests/integration/requests.api.test.ts > PATCH /api/requests/:id/status > returns 400 for an invalid status value 20ms
+ ✓ tests/integration/requests.api.test.ts > PATCH /api/requests/:id/status > returns 404 for an unknown id 10ms
+ ✓ tests/integration/requests.api.test.ts > errors > returns 404 ROUTE_NOT_FOUND for an unknown route 8ms
+ ✓ tests/integration/requests.api.test.ts > errors > never includes a stack trace in error responses 8ms
+ ✓ tests/unit/request-schema.test.ts > createRequestSchema > accepts a valid body and trims spaces 2ms
+ ✓ tests/unit/request-schema.test.ts > createRequestSchema > drops fields the client may not set (status, id) 1ms
+ ✓ tests/unit/request-schema.test.ts > createRequestSchema > returns only 'Title is required' for a title of only spaces 1ms
+ ✓ tests/unit/request-schema.test.ts > createRequestSchema > returns only 'Description is required' for an empty description 0ms
+ ✓ tests/unit/request-schema.test.ts > createRequestSchema > rejects a title shorter than 3 characters 0ms
+ ✓ tests/unit/request-schema.test.ts > createRequestSchema > rejects a title longer than 120 characters 0ms
+ ✓ tests/unit/request-schema.test.ts > createRequestSchema > rejects an unknown priority 0ms
+ ✓ tests/unit/request-service.test.ts > requestService > create() always saves the request as OPEN 3ms
+ ✓ tests/unit/request-service.test.ts > requestService > getById() throws 404 REQUEST_NOT_FOUND when missing 1ms
+ ✓ tests/unit/request-service.test.ts > requestService > changeStatus() throws 404 and does not save when missing 0ms
+ ✓ tests/unit/request-service.test.ts > requestService > changeStatus() throws 409 and does NOT save an invalid transition 0ms
+ ✓ tests/unit/request-service.test.ts > requestService > changeStatus() saves an allowed transition 0ms
+ ✓ tests/unit/status-rules.test.ts > canTransition > blocks OPEN->OPEN 1ms
+ ✓ tests/unit/status-rules.test.ts > canTransition > allows OPEN->IN_PROGRESS 0ms
+ ✓ tests/unit/status-rules.test.ts > canTransition > blocks OPEN->RESOLVED 0ms
+ ✓ tests/unit/status-rules.test.ts > canTransition > allows OPEN->CLOSED 0ms
+ ✓ tests/unit/status-rules.test.ts > canTransition > blocks IN_PROGRESS->OPEN 0ms
+ ✓ tests/unit/status-rules.test.ts > canTransition > blocks IN_PROGRESS->IN_PROGRESS 0ms
+ ✓ tests/unit/status-rules.test.ts > canTransition > allows IN_PROGRESS->RESOLVED 0ms
+ ✓ tests/unit/status-rules.test.ts > canTransition > blocks IN_PROGRESS->CLOSED 0ms
+ ✓ tests/unit/status-rules.test.ts > canTransition > blocks RESOLVED->OPEN 0ms
+ ✓ tests/unit/status-rules.test.ts > canTransition > allows RESOLVED->IN_PROGRESS 0ms
+ ✓ tests/unit/status-rules.test.ts > canTransition > blocks RESOLVED->RESOLVED 0ms
+ ✓ tests/unit/status-rules.test.ts > canTransition > allows RESOLVED->CLOSED 0ms
+ ✓ tests/unit/status-rules.test.ts > canTransition > blocks CLOSED->OPEN 0ms
+ ✓ tests/unit/status-rules.test.ts > canTransition > blocks CLOSED->IN_PROGRESS 0ms
+ ✓ tests/unit/status-rules.test.ts > canTransition > blocks CLOSED->RESOLVED 0ms
+ ✓ tests/unit/status-rules.test.ts > canTransition > blocks CLOSED->CLOSED 0ms
+ ✓ tests/unit/status-rules.test.ts > canTransition > treats CLOSED as final (no way out) 0ms
+
+ Test Files  4 passed (4)
+      Tests  50 passed (50)
+   Start at  08:50:08
+   Duration  4.10s (import 42%, tests 41%, transform 13%, setup 3%, worker 1%)
+
+    Isolate  4 workers spawned · ~124ms startup each (spawn + environment, per file)
+             at least ~373ms faster with isolate: false — reuses workers across files instead of one per file
+

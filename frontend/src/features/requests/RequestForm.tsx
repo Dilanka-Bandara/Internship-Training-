@@ -47,9 +47,11 @@ export function RequestForm() {
   const [values, setValues] = useState(empty);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState<{ ok: boolean; text: string } | null>(
-    null,
-  );
+  const [result, setResult] = useState<{
+    ok: boolean;
+    text: string;
+    createdId?: string;
+  } | null>(null);
 
   function set<K extends keyof CreateRequestInput>(
     key: K,
@@ -67,8 +69,9 @@ export function RequestForm() {
 
     setSubmitting(true);
     try {
-      await api.createRequest(values); // success ONLY after the server says OK
-      setResult({ ok: true, text: "Request created." });
+      // Success is shown ONLY after the server answers 201.
+      const created = await api.createRequest(values);
+      setResult({ ok: true, text: "Request created.", createdId: created.id });
       setValues(empty);
     } catch (err) {
       if (err instanceof ApiError && err.details) {
@@ -202,7 +205,15 @@ export function RequestForm() {
               : "rounded-md bg-red-50 p-3 text-sm text-red-800 dark:bg-red-950 dark:text-red-200"
           }
         >
-          {result.text}
+          {result.text}{" "}
+          {result.createdId && (
+            <Link
+              href={`/requests/${result.createdId}`}
+              className="font-medium underline"
+            >
+              View request
+            </Link>
+          )}
         </p>
       )}
     </form>
