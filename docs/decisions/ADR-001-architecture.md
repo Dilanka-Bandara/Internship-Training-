@@ -40,6 +40,18 @@ We are building a small internal Service Request Management System. One trainee 
 
 - **No authentication in the MVP:** anyone who can reach the app on the network can create requests and change any status. Accepted for a training project on a local machine; mitigated by keeping it off public networks. Adding login and roles (employee vs support agent) is listed as future work.
 
+## Implementation notes (added Day 4)
+
+The decision held up during the build. What happened in practice:
+
+- **Testing benefit was real:** the service was unit-tested with a fake repository (no database), and the whole API was integration-tested with Supertest without the UI — the two main reasons for choosing layers and a separate Express API.
+- **Boilerplate cost was real but small:** the requests module has 6 files (routes, controller, service, repository, schema, status-rules) for 4 endpoints.
+- **Prisma 7 differences from the guide:** the database URL lives in `prisma7.config.ts` (not `schema.prisma`), the client is generated into `src/generated/prisma`, and `prisma migrate dev` no longer generates the client automatically (`npm run db:generate` / `postinstall`).
+- **Error codes:** the code uses the codes from `docs/api-contract.md` (`REQUEST_NOT_FOUND`, `INVALID_STATUS_TRANSITION`) rather than the shorter examples in the study notes, so docs and code match.
+- **Test database:** integration tests use a separate `service_requests_test` database and refuse to run against any database whose name does not end in `_test`.
+
+The known risk (no authentication) is unchanged and still accepted for the MVP.
+
 ## Review trigger
 
 Revisit this decision if several teams need to deploy parts independently, if one part needs very different scaling, or when authentication and roles are added.

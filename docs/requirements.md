@@ -1,6 +1,6 @@
 # Requirements — Service Request Management System
 
-> Status: Draft (Day 1). Review and adapt before committing.
+> Status: Written on Day 1; updated on Day 4 — all MVP stories (US-1 to US-7) are built and verified. See the backlog (section 5) for where each one is checked.
 
 ## 1. Problem statement
 
@@ -66,27 +66,29 @@ As a **user**, I want to search by title, log in and add comments. *Out of scope
 
 ## 4. Non-functional requirements
 
-| ID | Requirement | How it is checked |
-|---|---|---|
-| NFR-1 Security | No secrets (passwords, tokens, `.env`) are committed to Git. Only `.env.example` with placeholders. | `git status` / repo review; `.gitignore` contains `.env` |
-| NFR-2 Error handling | API errors never expose stack traces or database details; all errors use one JSON shape. | Integration tests on 400/404/409/500 |
-| NFR-3 Validation | All input is validated on the server, even if the UI validates too. | Calling the API directly with bad data returns 400 |
-| NFR-4 Setup | A new developer can clone and run the project in under 15 minutes by following the README. | Fresh clone test |
-| NFR-5 Performance | API answers in under 1 second on a normal laptop with a small dataset. | Manual check with curl/Postman |
-| NFR-6 Usability | UI shows loading, empty, error and success states and works at phone width. Inputs have labels. | Manual check + screenshots |
+| ID | Requirement | How it is checked | Result (Day 4) |
+|---|---|---|---|
+| NFR-1 Security | No secrets (passwords, tokens, `.env`) are committed to Git. Only `.env.example` with placeholders. | `git status` / repo review; `.gitignore` contains `.env` | Met — only `.env.example` / `.env.test.example` are tracked; `.env`, `.env.local`, `.env.test` are ignored |
+| NFR-2 Error handling | API errors never expose stack traces or database details; all errors use one JSON shape. | Integration tests on 400/404/409/500 | Met — integration tests check the error shape and "no stack trace"; DB-down check returned a generic 500 (`evidence/Day-06/`) |
+| NFR-3 Validation | All input is validated on the server, even if the UI validates too. | Calling the API directly with bad data returns 400 | Met — Zod validation; unit + integration tests; `scripts/api-smoke-test.sh` |
+| NFR-4 Setup | A new developer can clone and run the project in under 15 minutes by following the README. | Fresh clone test | Not yet checked — README has full steps; fresh-clone test planned for Day 5 |
+| NFR-5 Performance | API answers in under 1 second on a normal laptop with a small dataset. | Manual check with curl/Postman | Met — the 21 integration tests (each a real HTTP request + database) run in about 0.5 s in total |
+| NFR-6 Usability | UI shows loading, empty, error and success states and works at phone width. Inputs have labels. | Manual check + screenshots | Met (manual) — all four states checked in the browser; 375 px width has no sideways scroll (`evidence/Day-04/`, `Day-07/`) |
 
 ## 5. Backlog
 
-| Priority | ID | Item | Scope | Planned day |
-|---|---|---|---|---|
-| 1 | US-1 | Create request | MVP | Day 2–4 |
-| 2 | US-2 | List requests | MVP | Day 2–4 |
-| 3 | US-6 | Validation errors | MVP | Day 3 |
-| 4 | US-7 | Health check | MVP | Day 3 |
-| 5 | US-4 | View one request | MVP | Day 3–4 |
-| 6 | US-3 | Filter by status | MVP | Day 3–4 |
-| 7 | US-5 | Change status | MVP | Day 4 |
-| 8 | US-8 | Search / login / comments | Future | — |
+| Priority | ID | Item | Scope | Status | Verified by |
+|---|---|---|---|---|---|
+| 1 | US-1 | Create request | MVP | Done | Integration tests `POST /api/requests`; form tested in browser incl. no false success when the API is down |
+| 2 | US-2 | List requests | MVP | Done | Integration test "lists requests newest first"; list page loading/empty/error states |
+| 3 | US-6 | Validation errors | MVP | Done | `request-schema.test.ts`; integration 400 tests; field messages shown in the form |
+| 4 | US-7 | Health check | MVP | Done | Integration test `GET /api/health`; DB stopped → 503 (`evidence/Day-06/`) |
+| 5 | US-4 | View one request | MVP | Done | Integration tests 200/400/404; details page shows "Request not found." for unknown ids |
+| 6 | US-3 | Filter by status | MVP | Done | Integration test filter + invalid filter 400; status filter on the list page |
+| 7 | US-5 | Change status | MVP | Done | `status-rules.test.ts` (all 16 transitions), `request-service.test.ts`, integration 200/409; details page shows the server's 409 message |
+| 8 | US-8 | Search / login / comments | Future | Not started | — |
+
+Built over Days 2–4 (frontend Day 2, API + database Day 3, integration + tests Day 4).
 
 ## 6. Scope
 
