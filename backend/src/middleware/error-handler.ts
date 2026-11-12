@@ -10,7 +10,8 @@ function sendError(
   details?: unknown,
 ) {
   res.status(status).json({
-    error: details === undefined ? { code, message } : { code, message, details },
+    error:
+      details === undefined ? { code, message } : { code, message, details },
   });
 }
 
@@ -41,7 +42,12 @@ export function errorHandler(
     return sendError(res, 400, "INVALID_JSON", "Body is not valid JSON");
   }
   if (type === "entity.too.large") {
-    return sendError(res, 413, "PAYLOAD_TOO_LARGE", "Request body is too large");
+    return sendError(
+      res,
+      413,
+      "PAYLOAD_TOO_LARGE",
+      "Request body is too large",
+    );
   }
 
   // Unexpected: full details go to the server log only, never to the client.
