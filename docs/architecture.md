@@ -1,6 +1,6 @@
 # Architecture — Service Request Management System
 
-> Status: Draft (Day 1). The Mermaid diagrams below render on GitHub. Also redraw them in draw.io or Excalidraw and save `docs/architecture.png` plus the editable source file.
+> Status: Designed on Day 1; built on Days 2–4 and the code follows these boundaries (see section 8). The Mermaid diagrams below render on GitHub. **TODO:** redraw the container diagram in draw.io or Excalidraw and save `docs/architecture.png` plus the editable source file.
 
 ## 1. Overview
 
@@ -122,4 +122,44 @@ See [ADR-001](decisions/ADR-001-architecture.md) for the decision record, altern
 ## 7. Known risks
 
 - **No login in the MVP:** anyone who can reach the app on the network can create requests and change statuses. Accepted for training; listed as future work.
-- **Single database instance:** if PostgreSQL is down, the whole app is down. The health endpoint returns `503` so this is visible.
+- **Single database instance:** if PostgreSQL is down, the whole app is down. The health endpoint returns `503` so this is visible; other endpoints return a generic `500` (no details leaked).
+- **No automated frontend tests:** the UI was checked manually in the browser; the API and business rules are covered by automated tests.
+
+## 8. Implementation map (as built)
+
+```
+frontend/src/
+├── app/
+│   ├── layout.tsx                 header + page frame
+│   └── requests/
+│       ├── page.tsx               /requests        list
+│       ├── new/page.tsx           /requests/new    create form
+│       └── [id]/page.tsx          /requests/{id}   details (id read on the server)
+├── features/requests/             RequestList, RequestForm, RequestDetails, StatusBadge, types
+└── lib/api-client.ts              the ONLY place that calls fetch → ApiError
+
+backend/src/
+├── app.ts                         builds the Express app (CORS, JSON limit, routes, error handler)
+├── server.ts                      starts listening; closes the DB on shutdown
+├── config/environment.ts          validates env variables at start-up
+├── database/connection.ts         one shared Prisma client
+├── middleware/                    AppError + error handler (one error shape)
+└── modules/
+    ├── health/routes.ts           GET /api/health (200 / 503)
+    └── requests/                  routes → controller → service → repository
+                                   + schema.ts (Zod) + status-rules.ts
+
+backend/tests/
+├── unit/                          status rules, service (fake repository), validation
+└── integration/                   every endpoint over HTTP with a real test database
+```
+
+**Boundary checks (does the code follow the diagram?)**
+
+| Rule from section 4 | Where it holds |
+|---|---|
+| Browser never talks to the database | Only `backend/` has `DATABASE_URL`; the frontend only knows `NEXT_PUBLIC_API_URL` |
+| Controller does HTTP only | `controller.ts` validates and picks status codes; no Prisma import |
+| Service has no `req`/`res` or SQL | `service.ts` imports only the repository, status rules, `AppError` and type definitions — unit-tested with a fake repository |
+| Repository does queries only | `repository.ts` contains only Prisma calls |
+| Dependencies point one way | controller → service → repository → database; nothing imports "upwards" |

@@ -1,6 +1,6 @@
 # Data Model — Service Request Management System
 
-> Status: Draft (Day 1).
+> Status: Designed on Day 1; implemented on Day 3 (PostgreSQL 17 + Prisma 7); status rules covered by automated tests on Day 4. See section 5.
 
 ## 1. Table: `service_requests`
 
@@ -69,3 +69,23 @@ stateDiagram-v2
 - Any other change (e.g. `CLOSED → OPEN`, `OPEN → RESOLVED`) is rejected with `409 INVALID_STATUS_TRANSITION`.
 - Setting the same status again (e.g. `OPEN → OPEN`) is also rejected with `409`.
 - This rule lives in the **service** layer (as a plain lookup table so it is easy to unit test), not in the controller or the UI.
+
+## 5. Where this lives in the code
+
+| Part of the design | File |
+|---|---|
+| Table, enums, defaults, index | `backend/prisma/schema.prisma` |
+| SQL that creates it (committed migration) | `backend/prisma/migrations/20261110112612_create_service_requests/migration.sql` |
+| API-side validation (lengths, enums, trimming) | `backend/src/modules/requests/schema.ts` |
+| Status workflow table | `backend/src/modules/requests/status-rules.ts` |
+| Rule enforcement (404 / 409, new = `OPEN`) | `backend/src/modules/requests/service.ts` |
+| Database queries | `backend/src/modules/requests/repository.ts` |
+
+**Tests that protect the model** (`npm test` in `backend/`):
+
+- `tests/unit/status-rules.test.ts` — all 16 from/to pairs match the table in section 4.
+- `tests/unit/request-service.test.ts` — a refused change returns `409` and is never saved; new requests are saved as `OPEN`.
+- `tests/unit/request-schema.test.ts` — trimming, length limits, client cannot set `status` or `id`.
+- `tests/integration/requests.api.test.ts` — the same rules over HTTP with a real test database (e.g. after a `409` the stored status is unchanged).
+
+The tests run against a separate `service_requests_test` database and apply the migrations automatically, so the schema in the repository is what is tested.
