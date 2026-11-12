@@ -5,13 +5,8 @@ import type {
   ServiceRequest,
   Status,
 } from "@/features/requests/types";
-import { mockApi } from "./mock-api";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
-
-// Temporary: lets the UI be shown before the backend exists (Day 3).
-// Remove on Day 4 when the UI talks to the real API.
-const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK_API === "true";
 
 export class ApiError extends Error {
   constructor(
@@ -53,7 +48,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return body as T;
 }
 
-const realApi = {
+export const api = {
   listRequests: (status?: Status) =>
     request<ServiceRequest[]>(
       `/api/requests${status ? `?status=${encodeURIComponent(status)}` : ""}`,
@@ -71,5 +66,3 @@ const realApi = {
       body: JSON.stringify({ status }),
     }),
 };
-
-export const api: typeof realApi = USE_MOCK ? mockApi : realApi;
