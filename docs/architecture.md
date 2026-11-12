@@ -96,6 +96,21 @@ Step by step:
 8. The frontend shows a success message only after the `201`. On network or server error it shows an error message instead.
 9. Unexpected errors go to the error handler: full details in the server log, generic `500` message to the client.
 
+### 5.1 Trace — "Change status" through every layer (as built on Day 4)
+
+| # | Layer | File | What happens |
+|---|---|---|---|
+| 1 | UI | `frontend/src/features/requests/RequestDetails.tsx` | User clicks **Mark as Resolved** → `changeStatus("RESOLVED")` → `api.updateStatus(id, "RESOLVED")`. The screen is **not** changed yet. |
+| 2 | API client | `frontend/src/lib/api-client.ts` | Sends `PATCH /api/requests/{id}/status` with `{"status":"RESOLVED"}`. A network failure becomes `ApiError(0, "NETWORK_ERROR")`. |
+| 3 | Route | `backend/src/modules/requests/routes.ts` | Matches `PATCH /:id/status` → `controller.changeStatus`. |
+| 4 | Controller | `backend/src/modules/requests/controller.ts` | Validates the id (UUID) and body (status enum) with Zod → `400 VALIDATION_ERROR` if wrong. |
+| 5 | Service | `backend/src/modules/requests/service.ts` | Loads the request (`404 REQUEST_NOT_FOUND` if missing), checks `canTransition(current, next)` from `status-rules.ts` (`409 INVALID_STATUS_TRANSITION` if not allowed). |
+| 6 | Repository | `backend/src/modules/requests/repository.ts` | `prisma.serviceRequest.update(...)` — a parameterised `UPDATE`; Prisma sets `updated_at`. |
+| 7 | Database | `service_requests` table | Row saved; enum type rejects any value outside the list. |
+| 8 | Back up | controller → client → UI | `200` + updated record → page shows the new status and "Status changed to Resolved." On `409` the page keeps the old status and shows the server's message, e.g. "Cannot change status from OPEN to RESOLVED". |
+
+Errors travel up the same path: the service throws an `AppError` → the error handler sends the standard JSON → the API client turns it into an `ApiError` → the component shows its message.
+
 ## 6. Why this architecture fits
 
 - One trainee, 5 days, small internal app → one deployable backend is simplest to run, test and explain.

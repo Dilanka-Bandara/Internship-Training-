@@ -4,7 +4,7 @@ A small internal web app where employees create service requests (IT, facilities
 
 - **Repository:** https://github.com/Dilanka-Bandara/Internship-Training-
 - **Default branch:** `main` (features are built on branches and merged through pull requests)
-- **Stack:** Next.js 16 · TypeScript · Tailwind CSS · Express 5 · Zod 4 · PostgreSQL 17 + Prisma 7 · Vitest + Supertest (Day 4)
+- **Stack:** Next.js 16 · TypeScript · Tailwind CSS · Express 5 · Zod 4 · PostgreSQL 17 + Prisma 7 · Vitest + Supertest
 
 ## Progress
 
@@ -12,16 +12,16 @@ A small internal web app where employees create service requests (IT, facilities
 |---|---|---|---|
 | Day 1 | 01 + 02 | Requirements and architecture | Done |
 | Day 2 | 03 + 04 | GitHub workflow, setup, frontend UI | Done |
-| Day 3 | 05 + 06 | Backend API and database | In progress |
-| Day 4 | 07 + 08 | Integration, tests, debugging | Not started |
+| Day 3 | 05 + 06 | Backend API and database | Done |
+| Day 4 | 07 + 08 | Integration, tests, debugging | In progress |
 | Day 5 | 09 + 10 | Security, deployment, demo | Not started |
 
 ## Repository structure
 
 ```
 ├── docs/        requirements, architecture, data model, API contract, ADRs
-├── frontend/    Next.js app (list + create form)
-├── backend/     Express API (src/, prisma/schema.prisma, prisma/migrations/)
+├── frontend/    Next.js app (list, create form, details + status changes)
+├── backend/     Express API (src/, prisma/, tests/unit, tests/integration, scripts/)
 └── evidence/    Day-01 … Day-10 daily records and screenshots
 ```
 
@@ -44,7 +44,11 @@ With Docker (credentials are for your laptop only — never reuse them):
 docker run --name vr-postgres -e POSTGRES_USER=vr_user -e POSTGRES_PASSWORD=change_me -e POSTGRES_DB=service_requests -p 5432:5432 -d postgres:17
 ```
 
-If port 5432 is already used (e.g. by a local PostgreSQL install), use another host port such as `-p 5434:5432` and put that port in `DATABASE_URL`. Next time, start it with `docker start vr-postgres`.
+If port 5432 is already used (e.g. by a local PostgreSQL install), use another host port such as `-p 15432:5432` and put that port in `DATABASE_URL`. Next time, start it with `docker start vr-postgres`.
+
+> **Windows tip:** if Docker says `ports are not available ... access permissions`, Windows has reserved that port. See the reserved ranges with `netsh interface ipv4 show excludedportrange protocol=tcp` and pick a port outside them.
+>
+> If your password contains special characters such as `@`, `:` or `/`, write them URL-encoded in `DATABASE_URL` (for example `@` → `%40`).
 
 Or use a local PostgreSQL install and create a database called `service_requests`.
 
@@ -61,7 +65,10 @@ npm run dev                     # API on http://localhost:4000
 
 Check it: open http://localhost:4000/api/health → `{"status":"ok","database":"up"}`.
 
-Try every endpoint (with the API running): `bash scripts/api-smoke-test.sh` (Git Bash).
+With the API running (Git Bash):
+
+- `bash scripts/api-smoke-test.sh` — calls every endpoint, including error cases.
+- `bash scripts/e2e-flow.sh` — create → list → get → status changes → refused change.
 
 ### Backend environment variables (`backend/.env`)
 
@@ -82,7 +89,11 @@ Run inside `backend/`:
 |---|---|
 | `npm run dev` | Start the API with auto-reload |
 | `npm run build` / `npm start` | Compile to `dist/` / run the compiled API |
-| `npm run typecheck` | TypeScript type check |
+| `npm test` | Run all unit + integration tests once |
+| `npm run test:watch` | Re-run tests on every change |
+| `npm run typecheck` | TypeScript type check (source and tests) |
+| `npm run lint` | ESLint |
+| `npm run format` / `npm run format:check` | Prettier write / check |
 | `npm run db:migrate` | Create/apply migrations (development) |
 | `npm run db:deploy` | Apply existing migrations (production) |
 | `npm run db:generate` | Regenerate the Prisma client after changing the schema |
@@ -99,6 +110,34 @@ Run inside `backend/`:
 
 Full details: [API contract](docs/api-contract.md).
 
+## How to run the tests
+
+Integration tests need a **separate** test database — they delete all rows before each test, so never point them at your real data.
+
+```bash
+# 1. Create the test database once (Docker example)
+docker exec vr-postgres psql -U vr_user -d service_requests -c "CREATE DATABASE service_requests_test;"
+
+# 2. Configure it
+cd backend
+cp .env.test.example .env.test    # Windows PowerShell: Copy-Item .env.test.example .env.test
+# edit .env.test: same user/password/port as .env, database service_requests_test
+
+# 3. Run
+npm test
+```
+
+Tests apply the migrations to the test database automatically, and **refuse to run** unless the database name ends in `_test`.
+
+| Suite | File | What it covers |
+|---|---|---|
+| Unit | `tests/unit/status-rules.test.ts` | All 16 status transitions (the main business rule) |
+| Unit | `tests/unit/request-service.test.ts` | Service rules with a fake repository: new = OPEN, 404, 409 is never saved |
+| Unit | `tests/unit/request-schema.test.ts` | Validation, trimming, ignored fields, regression test |
+| Integration | `tests/integration/requests.api.test.ts` | Every endpoint over HTTP with the real test database: 200/201/400/404/409, error shape |
+
+**Latest result (2026-11-12):** 4 files, **50 tests passed** — see [`evidence/Day-08/test-output.txt`](evidence/Day-08/test-output.txt).
+
 ## How to run the frontend
 
 ```bash
@@ -109,18 +148,23 @@ cp .env.example .env.local      # Windows PowerShell: Copy-Item .env.example .en
 npm run dev
 ```
 
-Open http://localhost:3000 (redirects to `/requests`).
+Open http://localhost:3000 (redirects to `/requests`). Start the backend first — if it is not running, pages show **"Cannot reach the server"** with a Retry button.
 
 ### Environment variables (`frontend/.env.local`)
 
 | Variable | Example | Purpose |
 |---|---|---|
 | `NEXT_PUBLIC_API_URL` | `http://localhost:4000` | Base URL of the Express API |
-| `NEXT_PUBLIC_USE_MOCK_API` | `false` | **Temporary.** `true` shows in-memory sample data until the backend exists. Removed on Day 4. |
 
-`.env.local` is ignored by Git — never commit real values. Restart `npm run dev` after changing it.
+`NEXT_PUBLIC_` values are copied into browser code — never put secrets there. `.env.local` is ignored by Git. Restart `npm run dev` after changing it.
 
-> Until the backend exists (Day 3), the list shows **"Cannot reach the server"** with a Retry button when the mock is off. That is the expected error state.
+### Pages
+
+| URL | What it does |
+|---|---|
+| `/requests` | List with status filter (loading / empty / error / success states) |
+| `/requests/new` | Create form with field validation |
+| `/requests/{id}` | Details and status change buttons (the API decides what is allowed) |
 
 ### Frontend scripts
 
@@ -148,8 +192,6 @@ Daily records, screenshots and test output are in [`evidence/`](evidence/) (`Day
 
 ## Known limitations
 
-- The frontend is not connected to the backend yet (Day 4). It uses a temporary mock (`NEXT_PUBLIC_USE_MOCK_API=true`) or shows the error state.
-- Mock data lives in browser memory and resets on a full page reload.
-- No automated tests yet (Day 4) — the API was checked with `scripts/api-smoke-test.sh`.
-- No authentication in the MVP (see ADR-001).
-- Request details page and status updates come on Day 4.
+- No authentication in the MVP (see ADR-001) — anyone who can reach the app can change statuses.
+- No automated frontend tests; the UI was checked manually (see `evidence/Day-07/`).
+- When the database is down, normal endpoints return `500` (only `/api/health` returns `503`).

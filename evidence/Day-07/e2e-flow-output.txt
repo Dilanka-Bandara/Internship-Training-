@@ -1,0 +1,31 @@
+
+### 1. Create a request (expect 201, status OPEN)
+{"id":"eab81f9c-2659-44ef-9662-49feb94ef93c","title":"E2E: Wi-Fi drops in meeting room C","description":"Laptops lose Wi-Fi every few minutes in room C.","category":"IT","priority":"MEDIUM","status":"OPEN","createdAt":"2026-11-12T03:19:56.448Z","updatedAt":"2026-11-12T03:19:56.448Z"}
+id = eab81f9c-2659-44ef-9662-49feb94ef93c
+
+### 2. List OPEN requests (expect the new id in the list)
+found eab81f9c-2659-44ef-9662-49feb94ef93c in OPEN list
+
+### 3. Get the request by id (expect 200)
+{"id":"eab81f9c-2659-44ef-9662-49feb94ef93c","title":"E2E: Wi-Fi drops in meeting room C","description":"Laptops lose Wi-Fi every few minutes in room C.","category":"IT","priority":"MEDIUM","status":"OPEN","createdAt":"2026-11-12T03:19:56.448Z","updatedAt":"2026-11-12T03:19:56.448Z"}
+-> HTTP 200
+
+### 4. OPEN -> IN_PROGRESS (expect 200)
+{"id":"eab81f9c-2659-44ef-9662-49feb94ef93c","title":"E2E: Wi-Fi drops in meeting room C","description":"Laptops lose Wi-Fi every few minutes in room C.","category":"IT","priority":"MEDIUM","status":"IN_PROGRESS","createdAt":"2026-11-12T03:19:56.448Z","updatedAt":"2026-11-12T03:19:56.720Z"}
+-> HTTP 200
+
+### 5. IN_PROGRESS -> RESOLVED (expect 200)
+{"id":"eab81f9c-2659-44ef-9662-49feb94ef93c","title":"E2E: Wi-Fi drops in meeting room C","description":"Laptops lose Wi-Fi every few minutes in room C.","category":"IT","priority":"MEDIUM","status":"RESOLVED","createdAt":"2026-11-12T03:19:56.448Z","updatedAt":"2026-11-12T03:19:56.781Z"}
+-> HTTP 200
+
+### 6. RESOLVED -> CLOSED (expect 200)
+{"id":"eab81f9c-2659-44ef-9662-49feb94ef93c","title":"E2E: Wi-Fi drops in meeting room C","description":"Laptops lose Wi-Fi every few minutes in room C.","category":"IT","priority":"MEDIUM","status":"CLOSED","createdAt":"2026-11-12T03:19:56.448Z","updatedAt":"2026-11-12T03:19:56.840Z"}
+-> HTTP 200
+
+### 7. CLOSED -> OPEN (expect 409, refused by the service)
+{"error":{"code":"INVALID_STATUS_TRANSITION","message":"Cannot change status from CLOSED to OPEN"}}
+-> HTTP 409
+
+### 8. Get again (expect status still CLOSED)
+{"id":"eab81f9c-2659-44ef-9662-49feb94ef93c","title":"E2E: Wi-Fi drops in meeting room C","description":"Laptops lose Wi-Fi every few minutes in room C.","category":"IT","priority":"MEDIUM","status":"CLOSED","createdAt":"2026-11-12T03:19:56.448Z","updatedAt":"2026-11-12T03:19:56.840Z"}
+-> HTTP 200
