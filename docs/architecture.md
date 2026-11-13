@@ -1,6 +1,6 @@
 # Architecture — Service Request Management System
 
-> Status: Designed on Day 1; built on Days 2–4 and the code follows these boundaries (see section 8). The Mermaid diagrams below render on GitHub. **TODO:** redraw the container diagram in draw.io or Excalidraw and save `docs/architecture.png` plus the editable source file.
+> Status: Designed on Day 1; built on Days 2–5 and the code follows these boundaries (see section 8). Deployment: [deployment.md](deployment.md). The Mermaid diagrams below render on GitHub. **TODO:** redraw the container diagram in draw.io or Excalidraw and save `docs/architecture.png` plus the editable source file.
 
 ## 1. Overview
 
@@ -122,7 +122,8 @@ See [ADR-001](decisions/ADR-001-architecture.md) for the decision record, altern
 ## 7. Known risks
 
 - **No login in the MVP:** anyone who can reach the app on the network can create requests and change statuses. Accepted for training; listed as future work.
-- **Single database instance:** if PostgreSQL is down, the whole app is down. The health endpoint returns `503` so this is visible; other endpoints return a generic `500` (no details leaked).
+- **Single database instance:** if PostgreSQL is down, the whole app is down. Since Day 5 every endpoint returns `503 SERVICE_UNAVAILABLE` so clients know it is temporary, and the API reconnects by itself.
+- **Single API instance with an in-memory rate limiter:** if the API were run as several copies, each would count requests separately (a shared store such as Redis would be needed).
 - **No automated frontend tests:** the UI was checked manually in the browser; the API and business rules are covered by automated tests.
 
 ## 8. Implementation map (as built)
@@ -139,11 +140,12 @@ frontend/src/
 └── lib/api-client.ts              the ONLY place that calls fetch → ApiError
 
 backend/src/
-├── app.ts                         builds the Express app (CORS, JSON limit, routes, error handler)
+├── app.ts                         builds the Express app (helmet, CORS, JSON limit, routes, error handler)
 ├── server.ts                      starts listening; closes the DB on shutdown
 ├── config/environment.ts          validates env variables at start-up
 ├── database/connection.ts         one shared Prisma client
-├── middleware/                    AppError + error handler (one error shape)
+├── middleware/                    AppError, error handler (one error shape),
+│                                  rate limit, database-outage detection (503)
 └── modules/
     ├── health/routes.ts           GET /api/health (200 / 503)
     └── requests/                  routes → controller → service → repository

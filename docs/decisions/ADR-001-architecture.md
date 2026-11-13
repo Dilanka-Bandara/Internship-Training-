@@ -52,6 +52,11 @@ The decision held up during the build. What happened in practice:
 
 The known risk (no authentication) is unchanged and still accepted for the MVP.
 
+## Implementation notes (added Day 5)
+
+- **Cross-cutting concerns stayed in one place:** security headers (`helmet`), rate limiting and the database-outage `503` were added as middleware in `src/middleware/` and `app.ts` — no change was needed in any controller, service or repository. This is the "cross-cutting" row of the layer table working as intended.
+- **Deployment fits the decision:** one backend to build and run (`npm run build`, `npm start`) and one migration command (`npm run db:deploy`). See `docs/deployment.md`.
+
 ## Review trigger
 
 Revisit this decision if several teams need to deploy parts independently, if one part needs very different scaling, or when authentication and roles are added.

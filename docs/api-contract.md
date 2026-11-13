@@ -1,6 +1,6 @@
 # API Contract — Service Request Management System
 
-> Status: Implemented (Day 3) — verified against the running API; see `evidence/Day-05/api-test-output.txt`. Base URL (local): `http://localhost:4000`. All bodies are JSON (`Content-Type: application/json`).
+> Status: Implemented (Day 3), covered by integration tests (Day 4), `429` / `503` added (Day 5) — verified against the running API; see `evidence/Day-05/api-test-output.txt` and `evidence/Day-09/`. Base URL (local): `http://localhost:4000`. All bodies are JSON (`Content-Type: application/json`).
 
 ## 1. Endpoints
 
@@ -13,6 +13,11 @@
 | GET | `/api/health` | Health check | `200 {"status":"ok","database":"up"}` | `503` database unavailable |
 
 Any unknown route → `404 ROUTE_NOT_FOUND`. Any unexpected server error → `500 INTERNAL_ERROR` (details only in server logs).
+
+Added on Day 5 (apply to every `/api/requests` endpoint):
+
+- Database unreachable → `503 SERVICE_UNAVAILABLE` (temporary — try again).
+- More than `RATE_LIMIT_PER_MINUTE` (default 100) requests per minute from one client → `429 RATE_LIMITED`. Responses include a standard `RateLimit` header. `/api/health` is not rate limited.
 
 ## 2. Record shape
 
@@ -53,8 +58,9 @@ Any unknown route → `404 ROUTE_NOT_FOUND`. Any unexpected server error → `50
 | `REQUEST_NOT_FOUND` | 404 | No request with that id |
 | `ROUTE_NOT_FOUND` | 404 | Unknown path |
 | `INVALID_STATUS_TRANSITION` | 409 | Status change not allowed by the workflow |
+| `RATE_LIMITED` | 429 | Too many requests from one client in a minute |
 | `INTERNAL_ERROR` | 500 | Unexpected server error |
-| `SERVICE_UNAVAILABLE` | 503 | Health check: database not reachable |
+| `SERVICE_UNAVAILABLE` | 503 | Database not reachable (health check and all endpoints) |
 
 ## 4. Examples
 

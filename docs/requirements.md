@@ -1,6 +1,6 @@
 # Requirements — Service Request Management System
 
-> Status: Written on Day 1; updated on Day 4 — all MVP stories (US-1 to US-7) are built and verified. See the backlog (section 5) for where each one is checked.
+> Status: Written on Day 1; final update Day 5 — all MVP stories (US-1 to US-7) are built and verified, and all 6 non-functional requirements are met. See the backlog (section 5) for where each one is checked.
 
 ## 1. Problem statement
 
@@ -71,7 +71,7 @@ As a **user**, I want to search by title, log in and add comments. *Out of scope
 | NFR-1 Security | No secrets (passwords, tokens, `.env`) are committed to Git. Only `.env.example` with placeholders. | `git status` / repo review; `.gitignore` contains `.env` | Met — only `.env.example` / `.env.test.example` are tracked; `.env`, `.env.local`, `.env.test` are ignored |
 | NFR-2 Error handling | API errors never expose stack traces or database details; all errors use one JSON shape. | Integration tests on 400/404/409/500 | Met — integration tests check the error shape and "no stack trace"; DB-down check returned a generic 500 (`evidence/Day-06/`) |
 | NFR-3 Validation | All input is validated on the server, even if the UI validates too. | Calling the API directly with bad data returns 400 | Met — Zod validation; unit + integration tests; `scripts/api-smoke-test.sh` |
-| NFR-4 Setup | A new developer can clone and run the project in under 15 minutes by following the README. | Fresh clone test | Not yet checked — README has full steps; fresh-clone test planned for Day 5 |
+| NFR-4 Setup | A new developer can clone and run the project in under 15 minutes by following the README. | Fresh clone test | Met (Day 5) — fresh clone from GitHub following only the README: install, configure, migrate, tests and both builds in about 2 minutes, plus PostgreSQL setup (`evidence/Day-10/fresh-clone-setup.txt`) |
 | NFR-5 Performance | API answers in under 1 second on a normal laptop with a small dataset. | Manual check with curl/Postman | Met — the 21 integration tests (each a real HTTP request + database) run in about 0.5 s in total |
 | NFR-6 Usability | UI shows loading, empty, error and success states and works at phone width. Inputs have labels. | Manual check + screenshots | Met (manual) — all four states checked in the browser; 375 px width has no sideways scroll (`evidence/Day-04/`, `Day-07/`) |
 
