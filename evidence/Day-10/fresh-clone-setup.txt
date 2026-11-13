@@ -1,0 +1,26 @@
+Fresh-clone setup test — followed only README.md, on 2026-11-13.
+Clone of GitHub main at the time (Day 4 merged, PR #4). PostgreSQL was already running in Docker (README step 1).
+Timings are seconds since the start. Database URLs are not printed.
+
+[1s] git clone (main branch from GitHub)
+[4s] cloned: 294af54 Merge pull request #4 from Dilanka-Bandara/feat/integration-and-tests
+[4s] backend: npm ci
+✔ Generated Prisma Client (7.10.1) to .\src\generated\prisma in 29ms
+added 396 packages, and audited 397 packages in 26s
+[31s] backend: cp .env.example .env + fill DATABASE_URL (values copied from my existing .env, as a teammate would type their own)
+[31s] backend: cp .env.test.example .env.test + fill DATABASE_URL
+[32s] backend: npm run db:migrate
+Already in sync, no schema change or pending migration was found.
+[34s] backend: npm test
+ Test Files  4 passed (4)
+      Tests  50 passed (50)
+[42s] backend: npm run build
+build OK
+[45s] frontend: npm ci
+added 360 packages, and audited 361 packages in 44s
+[90s] frontend: cp .env.example .env.local
+[90s] frontend: npm run build
+✓ Compiled successfully in 8.8s
+[107s] done
+
+Result: about 2 minutes for install + configure + migrate + tests + builds; plus a few minutes to start PostgreSQL and type my own .env values. Well under the 15-minute target (NFR-4).

@@ -1,0 +1,56 @@
+Production-like build and run on my laptop (2026-11-13 09:58). Node v26.13.0.
+
+===== BACKEND =====
+$ cd backend && npm ci
+✔ Generated Prisma Client (7.10.1) to .\src\generated\prisma in 42ms
+added 399 packages, and audited 400 packages in 37s
+7 moderate severity vulnerabilities
+
+$ npm run db:deploy        # prisma migrate deploy: applies committed migrations only
+Loaded Prisma config from prisma7.config.ts.
+Prisma schema loaded from prisma\schema.prisma.
+Datasource "db": PostgreSQL database "service_requests", schema "public" at "localhost:15432"
+1 migration found in prisma/migrations
+No pending migrations to apply.
+
+$ npm run build            # TypeScript -> dist/
+> service-requests-api@1.0.0 build
+> tsc
+build OK
+
+===== FRONTEND =====
+$ cd frontend && npm ci
+added 360 packages, and audited 361 packages in 45s
+7 moderate severity vulnerabilities
+
+$ npm run build
+✓ Compiled successfully in 1120ms
+✓ Generating static pages using 7 workers (6/6) in 737ms
+Route (app)
+┌ ○ /_not-found
+├ ○ /requests
+├   /requests/[id]
+│ └ ◐ /requests/[id]
+└ ○ /requests/new
+○  (Static)             prerendered as static content
+◐  (Partial Prerender)  prerendered as static HTML with dynamic server-streamed content
+
+===== RUN =====
+$ cd backend && NODE_ENV=production npm start      (node dist/server.js)
+$ cd frontend && npm start                         (next start, port 3000)
+
+$ curl -i localhost:4000/api/health
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+{"status":"ok","database":"up"}
+
+$ curl -I localhost:3000/          (home redirects to the list)
+HTTP/1.1 307 Temporary Redirect
+location: /requests
+
+$ curl -I localhost:3000/requests  (frontend security headers)
+HTTP/1.1 200 OK
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+(no X-Powered-By header)

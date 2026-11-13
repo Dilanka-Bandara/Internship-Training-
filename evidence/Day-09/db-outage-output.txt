@@ -1,0 +1,19 @@
+### Database outage handling (API running, database stopped with: docker stop vr-postgres)
+
+$ curl localhost:4000/api/health
+{"error":{"code":"SERVICE_UNAVAILABLE","message":"Database unavailable"}}  -> HTTP 503
+
+$ curl localhost:4000/api/requests      (immediately after the stop)
+{"error":{"code":"SERVICE_UNAVAILABLE","message":"The service is temporarily unavailable. Please try again shortly."}}  -> HTTP 503
+
+$ curl localhost:4000/api/requests      (3 seconds later)
+{"error":{"code":"SERVICE_UNAVAILABLE","message":"The service is temporarily unavailable. Please try again shortly."}}  -> HTTP 503
+
+$ curl -X POST localhost:4000/api/requests ...   (create while the database is down)
+{"error":{"code":"SERVICE_UNAVAILABLE","message":"The service is temporarily unavailable. Please try again shortly."}}  -> HTTP 503
+
+### Database started again (docker start vr-postgres)
+$ curl localhost:4000/api/health
+{"status":"ok","database":"up"}  -> HTTP 200
+$ curl localhost:4000/api/requests  (first 120 chars)
+[{"id":"db428625-78d4-4306-bcef-1c1b5fad9c0c","title":"addsfs","description":"this is a test","category":"IT","priority" ...  -> works again without restarting the API
