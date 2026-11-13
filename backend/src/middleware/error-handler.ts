@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { AppError } from "./app-error.js";
+import { isDatabaseUnavailable } from "./database-errors.js";
 
 // Every error response uses this shape (docs/api-contract.md).
 function sendError(
@@ -47,6 +48,17 @@ export function errorHandler(
       413,
       "PAYLOAD_TOO_LARGE",
       "Request body is too large",
+    );
+  }
+
+  // Database down: tell the client it is temporary (same code as /api/health).
+  if (isDatabaseUnavailable(err)) {
+    console.error("Database unavailable:", err);
+    return sendError(
+      res,
+      503,
+      "SERVICE_UNAVAILABLE",
+      "The service is temporarily unavailable. Please try again shortly.",
     );
   }
 

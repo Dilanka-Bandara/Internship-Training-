@@ -5,6 +5,14 @@ A small internal web app where employees create service requests (IT, facilities
 - **Repository:** https://github.com/Dilanka-Bandara/Internship-Training-
 - **Default branch:** `main` (features are built on branches and merged through pull requests)
 - **Stack:** Next.js 16 · TypeScript · Tailwind CSS · Express 5 · Zod 4 · PostgreSQL 17 + Prisma 7 · Vitest + Supertest
+- **Release:** `v1.0-training` — see [release notes](docs/release-notes.md)
+
+## What it does
+
+- Employees create service requests (title, description, category, priority); every request starts as **OPEN**.
+- Everyone can list requests (filter by status) and open one to see its details.
+- Support agents move a request through **OPEN → IN_PROGRESS → RESOLVED → CLOSED** (with re-open and close-early). The API refuses any other change.
+- Operators check `GET /api/health` to see whether the API and database are working.
 
 ## Progress
 
@@ -13,13 +21,13 @@ A small internal web app where employees create service requests (IT, facilities
 | Day 1 | 01 + 02 | Requirements and architecture | Done |
 | Day 2 | 03 + 04 | GitHub workflow, setup, frontend UI | Done |
 | Day 3 | 05 + 06 | Backend API and database | Done |
-| Day 4 | 07 + 08 | Integration, tests, debugging | In progress |
-| Day 5 | 09 + 10 | Security, deployment, demo | Not started |
+| Day 4 | 07 + 08 | Integration, tests, debugging | Done |
+| Day 5 | 09 + 10 | Security, deployment, final review, demo | Done |
 
 ## Repository structure
 
 ```
-├── docs/        requirements, architecture, data model, API contract, ADRs
+├── docs/        requirements, architecture, data model, API contract, deployment, ADRs, release notes
 ├── frontend/    Next.js app (list, create form, details + status changes)
 ├── backend/     Express API (src/, prisma/, tests/unit, tests/integration, scripts/)
 └── evidence/    Day-01 … Day-10 daily records and screenshots
@@ -78,8 +86,9 @@ With the API running (Git Bash):
 | `DATABASE_URL` | `postgresql://USER:PASSWORD@localhost:5432/service_requests?schema=public` | Database connection (secret — `.env` only) |
 | `CORS_ORIGIN` | `http://localhost:3000` | The only website allowed to call the API |
 | `NODE_ENV` | `development` | `development`, `test` or `production` |
+| `RATE_LIMIT_PER_MINUTE` | `100` | Optional. Requests per client per minute on `/api/requests` |
 
-The API refuses to start and names the missing variable if one is wrong.
+The API refuses to start and names the missing variable if one is wrong. In production it also requires `CORS_ORIGIN` to be set.
 
 ### Backend scripts
 
@@ -136,7 +145,30 @@ Tests apply the migrations to the test database automatically, and **refuse to r
 | Unit | `tests/unit/request-schema.test.ts` | Validation, trimming, ignored fields, regression test |
 | Integration | `tests/integration/requests.api.test.ts` | Every endpoint over HTTP with the real test database: 200/201/400/404/409, error shape |
 
-**Latest result (2026-11-12):** 4 files, **50 tests passed** — see [`evidence/Day-08/test-output.txt`](evidence/Day-08/test-output.txt).
+| Unit | `tests/unit/database-errors.test.ts` | Recognising a database outage (→ `503`) |
+
+**Latest result (2026-11-13):** 5 files, **54 tests passed** — see [`evidence/Day-10/test-results.txt`](evidence/Day-10/test-results.txt).
+
+## Security
+
+- Secrets only in `.env` files (ignored by Git); Git history checked — no real passwords.
+- Every endpoint validates its input on the server (Zod); status rules are enforced by the API, not the UI.
+- One error handler: clients never see stack traces, SQL or file paths.
+- CORS limited to the frontend; 100 kB body limit; rate limit (`429`); security headers (`helmet` on the API, `next.config.ts` on the frontend).
+- Database outage → `503` on every endpoint.
+
+Full checklist with evidence: [`evidence/Day-09/security-checklist.md`](evidence/Day-09/security-checklist.md).
+
+## Deployment
+
+How to build and run in production mode, verify, roll back, and what is still missing before real use: **[docs/deployment.md](docs/deployment.md)**.
+
+Short version:
+
+```bash
+cd backend && npm ci && npm run db:deploy && npm run build && NODE_ENV=production npm start
+cd frontend && npm ci && npm run build && npm start
+```
 
 ## How to run the frontend
 
@@ -184,7 +216,9 @@ Run inside `frontend/`:
 - [Architecture](docs/architecture.md) — context/container diagrams, layers, request flow
 - [Data model](docs/data-model.md) — table, constraints, ER diagram, status workflow
 - [API contract](docs/api-contract.md) — endpoints, examples, status codes, error shape
+- [Deployment and runbook](docs/deployment.md) — production build, environment variables, verify, rollback, operations
 - [ADR-001: Architecture](docs/decisions/ADR-001-architecture.md)
+- [Release notes v1.0-training](docs/release-notes.md)
 
 ## Evidence
 
@@ -192,6 +226,10 @@ Daily records, screenshots and test output are in [`evidence/`](evidence/) (`Day
 
 ## Known limitations
 
-- No authentication in the MVP (see ADR-001) — anyone who can reach the app can change statuses.
+- No authentication or authorization in the MVP (see ADR-001) — anyone who can reach the app can change statuses.
 - No automated frontend tests; the UI was checked manually (see `evidence/Day-07/`).
-- When the database is down, normal endpoints return `500` (only `/api/health` returns `503`).
+- No HTTPS, backups, structured logs or monitoring — needed before real use (see [deployment.md](docs/deployment.md#9-known-limitations-before-real-production-use)).
+- The rate limiter keeps its counts in memory, so it only works for a single API instance.
+- 7 moderate `npm audit` findings in dev-only lint tooling (production dependencies: 0).
+
+This is a **training project**. Finishing it does not approve it for production use.
