@@ -1,6 +1,6 @@
 # Daily Evidence Record — Day 10
 
-> Items marked **TODO** must be filled in by me, honestly, before the final commit.
+> Factual fields (links, hashes, checks, screenshots) were completed on 2026-11-15 from Git/GitHub. Items marked **TODO (me)** are my own reflections and are written by me.
 
 - **Date:** 2026-11-13 (real Day 5 of my 5-day plan — covers guide Day 09 and Day 10)
 - **Day / topic:** Day 10 — Final review, demo and handover
@@ -11,7 +11,7 @@
 - Technical debt: listing shortcuts honestly is a sign of maturity.
 - Release notes and tags: everyone can see exactly which version was reviewed.
 - A training project is not production software: production also needs authentication, monitoring, backups, load testing, security review and approval.
-- **TODO:** add anything else in my own words.
+- **TODO (me):** add anything else in my own words.
 
 ## What I implemented
 - **Review findings fixed:** database outage now `503` (was `500`); `CORS_ORIGIN` required in production; security headers; rate limit (see Day 09).
@@ -27,25 +27,25 @@
 ## How I tested it
 - `npm test` → 54 passed; lint, type check, format check clean (backend and frontend); both production builds succeed.
 - Fresh clone from GitHub following only the README → works.
-- **TODO:** practise the demo once with a timer.
+- **TODO (me):** practise the demo once with a timer.
 
 ## Evidence links
 - [Final test results](test-results.txt) · [Fresh-clone setup](fresh-clone-setup.txt) · [Demo notes + self-review](demo-notes.md)
-- **TODO:** demo recording or screenshots (optional backup)
+- Demo backup screenshots: [Day-04](../Day-04/) (UI states) and [Day-07](../Day-07/) (create → details → refused change → status change → network error), captured 2026-11-15 from `v1.0-training`
 
 ## Clean-repo check
 - All evidence folders present: Day-01 … Day-10.
 - No secrets (see [Day-09 checklist](../Day-09/security-checklist.md)), no temporary files (`dist/`, `.next/`, `node_modules/`, generated Prisma client are all ignored).
-- **TODO:** check my screenshots are redacted before committing them.
+- Screenshots checked for secrets on 2026-11-15 — none found (see [Day-09 checklist item 9](../Day-09/security-checklist.md)).
 
 ## Problem encountered / investigation / root cause / fix
-**TODO:** write any real problem (or "None today").
+**TODO (me):** write any real problem (or "None today").
 
 ## GitHub
 - **Branch:** `feat/security-and-release`
-- **Final pull request:** **TODO**
-- **Tag:** `v1.0-training` — **TODO:** commit hash
-- **Commit hash:** **TODO**
+- **Final pull request:** [#5](https://github.com/Dilanka-Bandara/Internship-Training-/pull/5) — merged as `dbc14aa`
+- **Tag:** `v1.0-training` → `dbc14aa` (pushed to GitHub)
+- **Commit hashes (2026-11-13):** `bb7d94c` docs: deployment runbook and release notes · `5551ac6` docs: Day 09-10 evidence
 
 ## Blockers / questions for supervisor
-**TODO**
+**TODO (me)**

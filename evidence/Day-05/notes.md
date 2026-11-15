@@ -1,6 +1,6 @@
 # Day 05 — What each backend layer does, and why
 
-> **TODO:** The guide asks for this "in your own words". Rewrite this draft so it is mine.
+> **TODO (me):** The guide asks for this "in your own words". Rewrite this draft so it is mine.
 
 ## Controller (`modules/requests/controller.ts`)
 Deals only with HTTP. It reads the body, URL params and query string, validates them with the Zod schemas, calls the service, and chooses the status code (`201` for create, `200` for the others). If validation fails it throws a `400 VALIDATION_ERROR`. It never contains business rules or database code.

@@ -1,6 +1,6 @@
 # Day 07 — Integration notes
 
-> **TODO:** Rewrite in my own words.
+> **TODO (me):** Rewrite in my own words.
 
 ## Layer-by-layer trace
 See [docs/architecture.md → 5.1 Trace](../../docs/architecture.md#51-trace--change-status-through-every-layer-as-built-on-day-4): a "Mark as Resolved" click from `RequestDetails.tsx` → `api-client.ts` → route → controller (Zod) → service (`canTransition`, 404/409) → repository (Prisma `UPDATE`) → PostgreSQL → back to the page.

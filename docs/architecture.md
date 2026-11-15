@@ -1,6 +1,10 @@
 # Architecture — Service Request Management System
 
-> Status: Designed on Day 1; built on Days 2–5 and the code follows these boundaries (see section 8). Deployment: [deployment.md](deployment.md). The Mermaid diagrams below render on GitHub. **TODO:** redraw the container diagram in draw.io or Excalidraw and save `docs/architecture.png` plus the editable source file.
+> Status: Designed on Day 1; built on Days 2–5 and the code follows these boundaries (see section 8). Deployment: [deployment.md](deployment.md). The Mermaid diagrams below render on GitHub.
+
+![Container diagram](architecture.png)
+
+Container diagram as an image — editable source: [architecture.drawio](architecture.drawio) (open at [app.diagrams.net](https://app.diagrams.net)).
 
 ## 1. Overview
 
