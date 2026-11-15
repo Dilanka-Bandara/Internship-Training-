@@ -1,6 +1,6 @@
 # Bug: a blank title returned two contradictory error messages
 
-> **TODO:** Read through and adjust to my own words before the final commit.
+> **TODO (me):** Read through and adjust to my own words.
 
 - **Date found:** 2026-11-10 (Day 3, while testing the API)
 - **Regression test added:** 2026-11-12 (Day 4)

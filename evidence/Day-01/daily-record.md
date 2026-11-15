@@ -1,6 +1,6 @@
 # Daily Evidence Record — Day 01
 
-> Items marked **TODO** must be filled in by me, honestly, before committing.
+> Factual fields (links, hashes, checks, screenshots) were completed on 2026-11-15 from Git/GitHub. Items marked **TODO (me)** are my own reflections and are written by me.
 
 - **Date:** 2026-11-09 (real Day 1 of my 5-day plan — covers guide Day 01 and Day 02)
 - **Day / topic:** Day 01 — Requirements and SDLC
@@ -11,7 +11,7 @@
 - The difference between functional and non-functional requirements.
 - How to write user stories ("As a…, I want…, so that…") with Given/When/Then acceptance criteria.
 - Scope, MVP, backlog and Definition of Done.
-- **TODO:** add anything else in my own words.
+- **TODO (me):** add anything else in my own words.
 
 ## What I implemented
 - Problem statement, users, 8 user stories (7 MVP, 1 future) with acceptance criteria.
@@ -24,23 +24,23 @@
 - `evidence/Day-01/daily-record.md`
 
 ## How I tested it
-Documentation day — no code. Checked that every MVP story has at least one acceptance criterion that a reviewer could verify. **TODO:** confirm.
+Documentation day — no code. Confirmed that every MVP story has acceptance criteria a reviewer can check: US-1 (3), US-2 (3), US-3 (2), US-4 (3), US-5 (2), US-6 (2), US-7 (2). All 7 MVP stories were later built and each is now verified by a named test (see the backlog).
 
 ## Evidence links
 - [Requirements](../../docs/requirements.md)
-- **TODO:** backlog screenshot (e.g. `evidence/Day-01/backlog.png`, or GitHub Project board)
+- Backlog: [backlog.png](backlog.png) — the backlog table as rendered on GitHub (captured 2026-11-15 from tag `v1.0-training`, so it also shows the final "Status" and "Verified by" columns added on Day 4).
 
 ## Problem encountered / investigation / root cause / fix
-**TODO:** write any real problem (or "None today").
+**TODO (me):** write any real problem (or "None today").
 
 ## What I would improve
-**TODO**
+**TODO (me)**
 
 ## GitHub
-- **Branch:** main
-- **Pull request:** N/A (PR workflow starts on Day 2/guide Day 03)
-- **Commit hash:** **TODO** (fill after pushing — `git log --oneline -3`)
+- **Branch:** `main` (the feature-branch + pull-request workflow started on Day 2 / guide Day 03)
+- **Pull request:** N/A — committed directly to `main`
+- **Commit hashes:** `7774d46` docs: add requirements and user stories · `7c128f6` docs: add architecture, data model, API contract and ADR-001 (2026-11-09)
 
 ## Blockers / questions for supervisor
 - I am following a 5-day plan, so two evidence folders (Day-01 and Day-02) are filled each day. Is one record per guide day OK?
-- **TODO:** any other questions.
+- **TODO (me):** any other questions.

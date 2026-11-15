@@ -1,6 +1,6 @@
 # Daily Evidence Record — Day 05
 
-> Items marked **TODO** must be filled in by me, honestly, before the final commit.
+> Factual fields (links, hashes, checks, screenshots) were completed on 2026-11-15 from Git/GitHub. Items marked **TODO (me)** are my own reflections and are written by me.
 
 - **Date:** 2026-11-10 (real Day 3 of my 5-day plan — covers guide Day 05 and Day 06)
 - **Day / topic:** Day 05 — Backend API and service layer
@@ -12,7 +12,7 @@
 - Why three layers: the service has no HTTP, so business rules can be tested without a server; the controller has no SQL.
 - TypeScript types disappear at run time, so Zod validates the real incoming data. `safeParse` + `z.flattenError` give `{ field: [messages] }`.
 - One `AppError` class + one error handler = one error shape for the whole API; unknown errors show a generic message and the details go to the server log only.
-- **TODO:** add anything else in my own words.
+- **TODO (me):** add anything else in my own words.
 
 ## What I implemented
 - `backend/` project: TypeScript (ESM, `nodenext`), Express 5, Zod 4, Prisma 7, `tsx` for development.
@@ -52,22 +52,21 @@ Ran `scripts/api-smoke-test.sh` against the running API — output saved in [api
 ## Evidence links
 - [API test output](api-test-output.txt)
 - [Controller / service / repository notes](notes.md)
-- **TODO (optional):** Postman/Insomnia screenshots of a success and an error response
+- Request/response evidence for success **and** error cases is the saved curl output above (15 calls, real responses).
 
 ## Problem encountered / investigation / root cause / fix
 - **Problem:** an empty title returned two messages at once: "Title is required" and "Title must be at least 3 characters".
 - **Investigation:** looked at the 400 response details in the test output.
 - **Root cause:** Zod runs every check on a field by default, so both the "required" check and the "minimum length" check failed together.
 - **Fix:** added `abort: true` to the "required" check so Zod stops at the first failure. Re-ran the tests — now only "Title is required" is shown.
-- **TODO:** confirm/edit in my own words.
 
 ## What I would improve
-**TODO**
+**TODO (me)**
 
 ## GitHub
 - **Branch:** `feat/backend-api`
-- **Pull request:** **TODO**
-- **Commit hash:** **TODO**
+- **Pull request:** [#2](https://github.com/Dilanka-Bandara/Internship-Training-/pull/2) — merged as `8c10390`
+- **Commit hashes (2026-11-10):** `a7a7e92` chore: scaffold Express backend · `f6318f0` feat: env config, database connection and error handling · `b01ebce` feat: requests module with validation and status rules (includes the bug fix) · `65b5531` feat: health endpoint, app setup and smoke test script
 
 ## Blockers / questions for supervisor
-**TODO**
+**TODO (me)**

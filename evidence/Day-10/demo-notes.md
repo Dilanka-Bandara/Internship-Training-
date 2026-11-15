@@ -1,6 +1,6 @@
 # Day 10 — Demo notes, self-review and handover
 
-> **TODO:** Practise this once out loud with a timer, and adjust the words to my own.
+> **TODO (me):** Practise this once out loud with a timer, and adjust the words to my own.
 
 ## Before the demo (5 minutes earlier)
 
@@ -56,8 +56,8 @@
 
 ## Handover
 
-- **Reviewed version:** tag `v1.0-training` — **TODO:** commit hash after merging (`git rev-parse --short v1.0-training`)
-- **Final pull request:** **TODO** link
+- **Reviewed version:** tag `v1.0-training` → commit `dbc14aa`
+- **Final pull request:** [#5](https://github.com/Dilanka-Bandara/Internship-Training-/pull/5) — merged as `dbc14aa`
 - **Run it:** README → "How to run the backend", "How to run the frontend"
 - **Deploy it:** `docs/deployment.md`
 - **Release notes:** `docs/release-notes.md`

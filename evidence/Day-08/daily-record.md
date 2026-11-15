@@ -1,6 +1,6 @@
 # Daily Evidence Record — Day 08
 
-> Items marked **TODO** must be filled in by me, honestly, before the final commit.
+> Factual fields (links, hashes, checks, screenshots) were completed on 2026-11-15 from Git/GitHub. Items marked **TODO (me)** are my own reflections and are written by me.
 
 - **Date:** 2026-11-12 (real Day 4 of my 5-day plan — covers guide Day 07 and Day 08)
 - **Day / topic:** Day 08 — Automated testing, debugging and quality
@@ -12,7 +12,7 @@
 - Mocking the repository makes service tests fast, but integration tests must use a real database so I am not only testing my mocks.
 - A regression test should **fail before the fix and pass after** — I checked this by breaking the code on purpose.
 - A simple debugging method: reproduce → read the error → narrow down (UI / API / DB) → root cause → fix + regression test.
-- **TODO:** add anything else in my own words.
+- **TODO (me):** add anything else in my own words.
 
 ## What I implemented
 - **Vitest + Supertest** in `backend/` with `npm test`.
@@ -41,15 +41,15 @@
 
 ## Evidence links
 - [Test output](test-output.txt) · [Quality checks](quality-checks-output.txt) · [Bug log](bug-log.md)
-- **TODO (optional):** screenshot of `npm test` in the terminal
+- The full test run is saved as text (every test name and result), which is more useful to a reviewer than a terminal screenshot. Re-run on 2026-11-15 on `v1.0-training`: 54 passed.
 
 ## What I would improve
-**TODO** (ideas: frontend component tests; test coverage report with `@vitest/coverage-v8`)
+**TODO (me)** (ideas: frontend component tests; test coverage report with `@vitest/coverage-v8`)
 
 ## GitHub
 - **Branch:** `feat/integration-and-tests`
-- **Pull request:** **TODO**
-- **Commit hash:** **TODO**
+- **Pull request:** [#3](https://github.com/Dilanka-Bandara/Internship-Training-/pull/3) — merged as `6b886b3` (doc updates in [#4](https://github.com/Dilanka-Bandara/Internship-Training-/pull/4))
+- **Commit hashes (2026-11-12):** `9138602` chore: test, lint and format tooling with a separate test database · `b0c046e` test: unit tests · `5289798` test: API integration tests · `6493a51` docs: test instructions and Day 07-08 evidence
 
 ## Blockers / questions for supervisor
-**TODO**
+**TODO (me)**

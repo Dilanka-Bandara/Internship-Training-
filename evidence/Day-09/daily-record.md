@@ -1,6 +1,6 @@
 # Daily Evidence Record — Day 09
 
-> Items marked **TODO** must be filled in by me, honestly, before the final commit.
+> Factual fields (links, hashes, checks, screenshots) were completed on 2026-11-15 from Git/GitHub. Items marked **TODO (me)** are my own reflections and are written by me.
 
 - **Date:** 2026-11-13 (real Day 5 of my 5-day plan — covers guide Day 09 and Day 10)
 - **Day / topic:** Day 09 — Security, deployment and operations
@@ -13,7 +13,7 @@
 - `prisma migrate deploy` (production: applies existing migrations) vs `migrate dev` (laptop only).
 - Rollback = redeploy the previous tag; database changes need a new migration to undo.
 - What a runbook is and why it is written for someone else.
-- **TODO:** add anything else in my own words.
+- **TODO (me):** add anything else in my own words.
 
 ## What I implemented
 - **Security review** — every checklist item checked with a command or test: [security-checklist.md](security-checklist.md).
@@ -48,16 +48,16 @@
 - **Investigation:** stopped the database while the API was running and read the server log: the error was `Connection terminated unexpectedly` from the PostgreSQL driver (other timings give `ECONNREFUSED`).
 - **Root cause:** the error handler only knew `AppError` and body-parser errors; everything else became `500`.
 - **Fix:** `isDatabaseUnavailable()` checks the error and its causes for connection error codes/messages; the handler returns `503 SERVICE_UNAVAILABLE`. Unit tests cover it; manual outage test confirms it.
-- Also: Docker Desktop hung on start-up this morning and had to be waited for / restarted before the database checks. **TODO:** confirm/edit in my own words.
+- Also: Docker Desktop did not respond after starting this morning (`docker info` hung for several minutes), so the database checks had to wait until it finished starting.
 
 ## What I would improve
-**TODO** (ideas: structured JSON logs with a request id; authentication; least-privilege DB user)
+**TODO (me)** (ideas: structured JSON logs with a request id; authentication; least-privilege DB user)
 
 ## GitHub
 - **Branch:** `feat/security-and-release`
-- **Pull request:** **TODO**
-- **Commit hash:** **TODO**
+- **Pull request:** [#5](https://github.com/Dilanka-Bandara/Internship-Training-/pull/5) — merged as `dbc14aa`
+- **Commit hashes (2026-11-13):** `ddf7000` feat: security headers, rate limiting and production config checks · `9a6f90b` fix: return 503 instead of 500 when the database is unreachable · `0ebf350` feat: security headers on the frontend
 
 ## Blockers / questions for supervisor
 - Is a production-like build on my laptop enough, or is there an approved training environment I should deploy to?
-- **TODO:** any other questions.
+- **TODO (me):** any other questions.
